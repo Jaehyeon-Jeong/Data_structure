@@ -1,0 +1,108 @@
+#include <iostream>
+
+
+
+
+class Vector {
+public:
+    int* data;       // pointer to the array of elements
+    int size;        // current number of elements in the vector
+    int capacity;    // current capacity of the vector
+    
+    Vector() {
+        data = new int[1];
+        size = 0;
+        capacity = 1;
+    }
+
+    ~Vector() {
+        delete[] data;
+    }
+
+    void push(int value) {
+        if (size == capacity) {
+            resize(capacity * 2);
+        }
+        data[size++] = value;
+        std::cout << "ok\n";
+    }
+
+    void pop() {
+        if (size == 0) {
+            std::cout << "error\n";
+        } else {
+            std::cout << data[--size] << "\n";
+        }
+        if (size == capacity / 2) {
+            capacity /= 2;
+        }
+    }
+
+    void at(int i) {
+        if (i >= size) {
+            std::cout << "error\n";
+        } else {
+            std::cout << data[i] << "\n";
+        }
+    }
+
+    void resize(int new_capacity) {
+        int* new_data = new int[new_capacity];
+        for (int i = 0; i < size; i++) {
+            new_data[i] = data[i];
+        }
+        capacity = new_capacity;
+        delete[] data;
+        data = new_data;
+    }
+
+    void size_() {
+        std::cout << size << "\n";
+    }
+
+    void capacity_() {
+        std::cout << capacity << "\n";
+    }
+
+    void clear() {
+        delete[] data;
+        data = nullptr;
+        size = 0;
+        capacity = 1;
+        std::cout << "ok\n";
+    }
+};
+
+int main() {
+    Vector vector;
+    std::string query;
+    while (std::cin >> query) {
+        if (query == "push") {
+            int value;
+            std::cin >> value;
+            vector.push(value);
+        } else if (query == "pop") {
+            vector.pop();
+        } else if (query == "at") {
+            int i;
+            std::cin >> i;
+            vector.at(i);
+        } else if (query == "resize") {
+            int new_capacity;
+            std::cin >> new_capacity;
+            vector.resize(new_capacity);
+            std::cout << "ok\n";
+        } else if (query == "size") {
+            vector.size_();
+        } else if (query == "capacity") {
+            vector.capacity_();
+        } else if (query == "clear") {
+            vector.clear();
+        } else if (query == "exit") {
+            std::cout << "bye\n";
+            break;
+        }
+    }
+    return 0;
+}
+
