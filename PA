@@ -1,0 +1,21 @@
+
+#include <iostream>
+
+
+int main() {
+    
+    unsigned long long num;
+    unsigned long long rev_num = 0; // why we need to set 0 in here ...
+    
+    std::cin >> num;
+    
+    for(; num > 0; num /= 10){
+        rev_num = rev_num * 10 + num % 10;
+        
+    }
+    
+    std::cout << rev_num << std::endl;
+    
+        
+    return 0;
+}
