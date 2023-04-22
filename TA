@@ -2,87 +2,94 @@
 
 
 
-
+template<class T>
 class Vector {
 public:
-    int* data;       // pointer to the array of elements
-    int size;        // current number of elements in the vector
-    int capacity;    // current capacity of the vector
+    int* data_;       // pointer to the array of elements
+    int size_;        // current number of elements in the vector
+    int capacity_;    // current capacity of the vector
     
     Vector() {
-        data = new int[1];
-        size = 0;
-        capacity = 1;
+        data_ = new int[1];
+        size_ = 0;
+        capacity_ = 1;
     }
 
     ~Vector() {
-        delete[] data;
+        delete[] data_;
     }
 
-    void push(int value) {
-        if (size == capacity) {
-            resize(capacity * 2);
+    void Push(int value) {
+        if (size_ == capacity_) {
+            resize(capacity_ * 2);
         }
-        data[size++] = value;
+        data_[size_++] = value;
         std::cout << "ok\n";
     }
 
-    void pop() {
-        if (size == 0) {
-            std::cout << "error\n";
-        } else {
-            std::cout << data[--size] << "\n";
+    T Pop(){
+            if (size_ == 0) {
+                throw "error\n";
+            }
+        
+        if (size_ == capacity_ / 2) {
+            capacity_ /= 2;
         }
-        if (size == capacity / 2) {
-            capacity /= 2;
-        }
+        return data_[--size_];
     }
 
+    
+
     void at(int i) {
-        if (i >= size) {
+        if (i >= size_) {
             std::cout << "error\n";
         } else {
-            std::cout << data[i] << "\n";
+            std::cout << data_[i] << "\n";
         }
     }
 
     void resize(int new_capacity) {
         int* new_data = new int[new_capacity];
-        for (int i = 0; i < size; i++) {
-            new_data[i] = data[i];
+        for (int i = 0; i < size_; i++) {
+            new_data[i] = data_[i];
         }
-        capacity = new_capacity;
-        delete[] data;
-        data = new_data;
+        capacity_ = new_capacity;
+        delete[] data_;
+        data_ = new_data;
     }
 
-    void size_() {
-        std::cout << size << "\n";
+    void size() {
+        std::cout << size_ << "\n";
     }
 
-    void capacity_() {
-        std::cout << capacity << "\n";
+    void capacity() {
+        std::cout << capacity_ << "\n";
     }
 
     void clear() {
-        delete[] data;
-        data = nullptr;
-        size = 0;
-        capacity = 1;
+        delete[] data_;
+        data_ = nullptr;
+        size_ = 0;
+        capacity_ = 1;
         std::cout << "ok\n";
     }
 };
 
 int main() {
-    Vector vector;
+    Vector<int> vector;
     std::string query;
     while (std::cin >> query) {
         if (query == "push") {
             int value;
             std::cin >> value;
-            vector.push(value);
+            vector.Push(value);
         } else if (query == "pop") {
-            vector.pop();
+            try {
+                vector.Pop();
+            }
+            catch (char m) {
+                std::cout<< "error\n";
+            }
         } else if (query == "at") {
             int i;
             std::cin >> i;
@@ -93,9 +100,9 @@ int main() {
             vector.resize(new_capacity);
             std::cout << "ok\n";
         } else if (query == "size") {
-            vector.size_();
+            vector.size();
         } else if (query == "capacity") {
-            vector.capacity_();
+            vector.capacity();
         } else if (query == "clear") {
             vector.clear();
         } else if (query == "exit") {
