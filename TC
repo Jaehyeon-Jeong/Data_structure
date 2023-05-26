@@ -1,1 +1,120 @@
+#include <iostream>
+#include <string>
+
+template <class T>
+class Stack {
+ public:
+  T* data;
+  int size;
+  int capacity;
+
+  Stack() {
+    capacity = 10000;
+    data = new T[capacity];
+    size = 0;
+  }
+
+  ~Stack() { delete[] data; }
+
+  void Push(T n) {
+    if (size == capacity) {
+      if (capacity == 10000) {
+        throw "error";
+      }
+      capacity = std::min(2 * capacity, 10000);
+      T* new_data = new T[capacity];
+      for (int i = 0; i < size; i++) {
+        new_data[i] = data[i];
+      }
+      delete[] data;
+      data = new_data;
+    }
+    data[size++] = n;
+    std::cout << "ok\n";
+  }
+
+  T Pop() {
+    if (size == 0) {
+      throw "error\n";
+    }
+    return data[--size];
+  }
+
+  T Back() {
+    if (size == 0) {
+      throw "error\n";
+    }
+    return data[size - 1];
+  }
+
+  int Size() { return size; }
+
+  void Clear() {
+    size = 0;
+    throw "ok\n";
+  }
+};
+
+void PushOver(Stack<int>& is_stack) {
+  int n;
+  std::cin >> n;
+  is_stack.Push(n);
+}
+
+void PopOver(Stack<int>& is_stack) {
+  try {
+    int n = is_stack.Pop();
+    std::cout << n << "\n";
+  } catch (const char* msg) {
+    std::cout << msg << "\n";
+  }
+}
+
+void BackOver(Stack<int>& is_stack) {
+  try {
+    int n = is_stack.Back();
+    std::cout << n << "\n";
+  } catch (const char* msg) {
+    std::cout << msg << "\n";
+  }
+}
+
+void SizeOver(Stack<int>& is_stack) {
+  int n = is_stack.Size();
+  std::cout << n << "\n";
+}
+
+void CleaOver(Stack<int>& is_stack) {
+  try {
+    is_stack.Clear();
+  } catch (const char* msg) {
+    std::cout << msg << "\n";
+  }
+}
+
+int main() {
+  Stack<int> is_stack;
+  std::string input;
+
+  while (std::cin >> input) {
+    if (input == "push") {
+      PushOver(is_stack);
+    } else if (input == "pop") {
+      PopOver(is_stack);
+    } else if (input == "back") {
+      BackOver(is_stack);
+    } else if (input == "size") {
+      SizeOver(is_stack);
+    } else if (input == "clear") {
+      CleaOver(is_stack);
+    } else if (input == "exit") {
+      std::cout << "bye";
+      return 0;
+    } else {
+      std::cout << "error";
+    }
+  }
+
+  return 0;
+}
 
