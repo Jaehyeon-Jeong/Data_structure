@@ -1,0 +1,84 @@
+#include <iostream>
+#include <string>
+
+struct Node {
+  char value;
+  Node* next;
+};
+
+class List {
+ private:
+  Node* head_;
+
+  Node* ReverseListRecursive(Node* current, Node* previous) {
+    if (current == nullptr) {
+      head_ = previous;
+      return nullptr;
+    }
+
+    Node* next_node = current->next;
+    current->next = previous;
+
+    ReverseListRecursive(next_node, current);
+
+    return head_;
+  }
+
+ public:
+  List(const std::string& sequence) {
+    head_ = nullptr;
+
+    if (!sequence.empty()) {
+      head_ = new Node();
+      head_->value = sequence[0];
+      head_->next = nullptr;
+
+      Node* prev_node = head_;
+
+      for (int i = 1; i < sequence.length(); i++) {
+        Node* new_node = new Node();
+        new_node->value = sequence[i];
+        new_node->next = nullptr;
+        prev_node->next = new_node;
+        prev_node = new_node;
+      }
+    }
+  }
+
+  void ReverseAndPrint() {
+    Node* reversed_head = ReverseListRecursive(head_, nullptr);
+    PrintList(reversed_head);
+  }
+
+  void PrintList(Node* node) {
+    if (node == nullptr) {
+      std::cout << "List is empty." << std::endl;
+      return;
+    }
+
+    while (node != nullptr) {
+      std::cout << node->value;
+      node = node->next;
+    }
+    std::cout << std::endl;
+  }
+  ~List() {
+    Node* current = head_;
+    while (current != nullptr) {
+      Node* next = current->next;
+      delete current;
+      current = next;
+    }
+  }
+};
+
+int main() {
+  std::string sequence;
+  std::cout << "";
+  std::getline(std::cin, sequence);
+
+  List my_list(sequence);
+  my_list.ReverseAndPrint();
+
+  return 0;
+}
