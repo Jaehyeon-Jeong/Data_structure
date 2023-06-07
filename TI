@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+
+template <typename T>
+class MyHashSet {
+ private:
+  std::vector<bool> map_;
+
+ public:
+  MyHashSet() { map_ = std::vector<bool>(1000001, false); }
+
+  void Add(const T& element) { map_[element] = true; }
+
+  void Remove(const T& element) { map_[element] = false; }
+
+  bool Contains(const T& element) const { return map_[element]; }
+};
+
+int main() {
+  MyHashSet<int> my_set;
+
+  char operation;
+  int number;
+
+  while (std::cin >> operation >> number) {
+    if (operation == '+') {
+      my_set.Add(number);
+    } else if (operation == '-') {
+      my_set.Remove(number);
+    } else if (operation == '?') {
+      if (my_set.Contains(number)) {
+        std::cout << "YES"
+                  << "\n";
+      } else {
+        std::cout << "NO"
+                  << "\n";
+      }
+    }
+  }
+  return 0;
+}
