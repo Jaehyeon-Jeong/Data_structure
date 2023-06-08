@@ -1,0 +1,78 @@
+#include <iostream>
+#include <vector>
+
+template <typename T>
+class MyHashTable {
+ private:
+  std::vector<std::vector<T>> table_;
+  int bucket_count_;
+
+  int HashFunction(const T& element) const {
+    return std::hash<T>{}(element) % bucket_count_;
+  }
+
+ public:
+  MyHashTable(int bucket_count) : bucket_count_(bucket_count) {
+    table_.resize(bucket_count_);
+  }
+
+  void Add(const T& element) {
+    int index = HashFunction(element);
+    std::vector<T>& bucket = table_[index];
+
+    for (const T& value : bucket) {
+      if (value == element) {
+        return;
+      }
+    }
+    bucket.push_back(element);
+  }
+
+  void Remove(const T& element) {
+    int index = HashFunction(element);
+    std::vector<T>& bucket = table_[index];
+
+    for (size_t i = 0; i < bucket.size(); ++i) {
+      if (bucket[i] == element) {
+        bucket.erase(bucket.begin() + i);
+        return;
+      }
+    }
+  }
+
+  bool Contains(const T& element) const {
+    int index = HashFunction(element);
+    const std::vector<T>& bucket = table_[index];
+
+    for (const T& value : bucket) {
+      if (value == element) {
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+int main() {
+  MyHashTable<int> my_table(1000001);
+
+  char operation;
+  int number;
+
+  while (std::cin >> operation >> number) {
+    if (operation == '+') {
+      my_table.Add(number);
+    } else if (operation == '-') {
+      my_table.Remove(number);
+    } else if (operation == '?') {
+      if (my_table.Contains(number)) {
+        std::cout << "YES"
+                  << "\n";
+      } else {
+        std::cout << "NO"
+                  << "\n";
+      }
+    }
+  }
+  return 0;
+}
