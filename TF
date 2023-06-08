@@ -1,70 +1,70 @@
 #include <iostream>
 
-void insertionSort(int arr[], int low, int high) {
-  for (int i = low + 1; i <= high; i++) {
-    int key = arr[i];
-    int j;
-    for (j = i - 1; j >= low && arr[j] > key; j--) {
-      arr[j + 1] = arr[j];
+template <typename T>
+class Sorter {
+ private:
+  void swap(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+  }
+
+ public:
+  void insertionSort(T* arr, int low, int high) {
+    for (int i = low + 1; i <= high; i++) {
+      T key = arr[i];
+      int j = i - 1;
+      while (j >= low && arr[j] > key) {
+        arr[j + 1] = arr[j];
+        j--;
+      }
+      arr[j + 1] = key;
     }
-    arr[j + 1] = key;
-  }
-}
-
-void merge(int arr[], int low, int mid, int high) {
-  int n1 = mid - low + 1;
-  int n2 = high - mid;
-
-  int* left = new int[n1];
-  int* right = new int[n2];
-
-  for (int i = 0; i < n1; i++) {
-    left[i] = arr[low + i];
-  }
-  for (int j = 0; j < n2; j++) {
-    right[j] = arr[mid + 1 + j];
   }
 
-  int i = 0, j = 0, k = low;
+  int partition(T* arr, int low, int high) {
+    T pivot = arr[(low + high) / 2];
+    int i = low;
+    int j = high;
 
-  for (; i < n1 && j < n2; k++) {
-    if (left[i] <= right[j]) {
-      arr[k] = left[i];
+    while (i <= j) {
+      while (arr[i] < pivot) {
+        i++;
+      }
+      while (arr[j] > pivot) {
+        j--;
+      }
+      if (i >= j) {
+        break;
+      }
+      swap(arr[i], arr[j]);
       i++;
-    } else {
-      arr[k] = right[j];
-      j++;
+      j--;
+    }
+    return j;
+  }
+
+  void quickSort(T* arr, int low, int high) {
+    while (low < high) {
+      if (high - low + 1 < 256) {
+        insertionSort(arr, low, high);
+        return;
+      } else {
+        int pi = partition(arr, low, high);
+
+        if (low < high) {
+          quickSort(arr, low, pi);
+          low = pi + 1;
+        } else {
+          quickSort(arr, pi + 1, high);
+          high = pi - 1;
+        }
+      }
     }
   }
+};
 
-  for (; i < n1; i++, k++) {
-    arr[k] = left[i];
-  }
-
-  for (; j < n2; j++, k++) {
-    arr[k] = right[j];
-  }
-
-  delete[] left;
-  delete[] right;
-}
-
-void mergeSort(int arr[], int low, int high) {
-  if (low < high) {
-    if (high - low + 1 < 256) {
-      insertionSort(arr, low, high);
-    } else {
-      int mid = low + (high - low) / 2;
-
-      mergeSort(arr, low, mid);
-      mergeSort(arr, mid + 1, high);
-
-      merge(arr, low, mid, high);
-    }
-  }
-}
-
-void printArray(int arr[], int size) {
+void printArray(const int* arr, int size) {
   for (int i = 0; i < size; i++) {
     std::cout << arr[i] << "\n";
   }
@@ -73,13 +73,17 @@ void printArray(int arr[], int size) {
 int main() {
   int N;
   std::cin >> N;
-  int* arr = new int[N];
+  if (N <= 0) {
+    return 0;
+  }
 
+  int* arr = new int[N];
   for (int i = 0; i < N; i++) {
     std::cin >> arr[i];
   }
 
-  mergeSort(arr, 0, N - 1);
+  Sorter<int> sorter;
+  sorter.quickSort(arr, 0, N - 1);
 
   printArray(arr, N);
   std::cout << "\n";
