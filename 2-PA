@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+
+const unsigned long long MOD = 1000003;
+
+// Function to multiply two matrices
+std::vector<std::vector<unsigned long long>> multiply(
+    const std::vector<std::vector<unsigned long long>>& A,
+    const std::vector<std::vector<unsigned long long>>& B) {
+  int n = 2;
+  int m = 2;
+  int p = 2;
+
+  std::vector<std::vector<unsigned long long>> result(
+      n, std::vector<unsigned long long>(m, 0));
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      for (int k = 0; k < p; k++) {
+        result[i][j] = result[i][j] + (A[i][k] * B[k][j]) % MOD;
+        result[i][j] = result[i][j] % MOD;
+      }
+    }
+  }
+
+  return result;
+}
+
+// Function to calculate the matrix power of F^n
+std::vector<std::vector<unsigned long long>> matrixPower(
+    const std::vector<std::vector<unsigned long long>>& mat,
+    unsigned long long n) {
+  if (n <= 1) {
+    return mat;
+  }
+
+  std::vector<std::vector<unsigned long long>> result = matrixPower(mat, n / 2);
+  result = multiply(result, result);
+
+  if (n % 2 == 1) {
+    result = multiply(result, mat);
+  }
+
+  return result;
+}
+
+// Function to calculate the nth Fibonacci number using matrix exponentiation
+unsigned long long findFibonacci(unsigned long long n) {
+  if (n == 0)
+    return 0;
+  else if (n == 1)
+    return 0;
+
+  std::vector<std::vector<unsigned long long>> result = {{1, 1}, {1, 0}};
+  result = matrixPower(result, n - 1);
+
+  return result[0][1];
+}
+
+int main() {
+  unsigned long long n;
+  std::cin >> n;
+
+  unsigned long long finalResult = findFibonacci(n);
+  std::cout << finalResult << std::endl;
+
+  return 0;
+}
