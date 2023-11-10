@@ -1,0 +1,80 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+
+class Graph {
+  int num_v_;
+  std::vector<std::vector<int>> adj_;
+
+ public:
+  Graph(int n);
+  void Edgeconnect(int a, int b);
+  void Bfs(int start, std::vector<int>& nei);
+  int Ccs(int leon, int matilda, int milk);
+};
+
+Graph::Graph(int n) : num_v_(n), adj_(n + 1) {}
+
+void Graph::Edgeconnect(int a, int b) {
+  adj_[a].push_back(b);
+  adj_[b].push_back(a);
+}
+void Graph::Bfs(int start, std::vector<int>& nei) {
+  int n = num_v_;
+  std::queue<int> q;
+  std::vector<bool> visited(n + 1, false);
+  nei[start] = 0;
+  visited[start] = true;
+  q.push(start);
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop();
+    for (int v : adj_[u]) {
+      if (!visited[v]) {
+        visited[v] = true;
+        nei[v] = nei[u] + 1;
+        q.push(v);
+      }
+    }
+  }
+}
+
+int Graph::Ccs(int leon, int matilda, int milk) {
+  const int kMax = 100005;
+  int n = num_v_;
+  std::vector<int> ccs_leon(n + 1, kMax);
+  std::vector<int> ccs_matilda(n + 1, kMax);
+  std::vector<int> ccs_milk(n + 1, kMax);
+
+  Bfs(leon, ccs_leon);
+  Bfs(matilda, ccs_matilda);
+  Bfs(milk, ccs_milk);
+
+  int min_sum = kMax;
+  for (int i = 1; i <= n; i++) {
+    int total = ccs_leon[i] + ccs_matilda[i] + ccs_milk[i];
+    if (total < min_sum) {
+      min_sum = total;
+    }
+  }
+  return min_sum;
+}
+
+int main() {
+  int n, m, leon, matilda, milk;
+  std::cin >> n >> m >> leon >> matilda >> milk;
+
+  Graph street_map(n);
+
+  for (int i = 0; i < m; i++) {
+    int u, v;
+    std::cin >> u >> v;
+    street_map.Edgeconnect(u, v);
+  }
+
+  int common_streets = street_map.Ccs(leon, matilda, milk);
+
+  std::cout << common_streets << std::endl;
+
+  return 0;
+}
