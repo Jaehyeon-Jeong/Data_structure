@@ -1,0 +1,68 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+
+const int INFINITY_VALUE = 1e9;
+
+struct Teleportation {
+  int to;
+  int cost;
+};
+
+int minCostToConference(
+    int N, int M, int K, int S, int F,
+    const std::vector<std::vector<Teleportation>>& teleportations) {
+  std::vector<int> minCost(N, INFINITY_VALUE);
+  minCost[S - 1] = 0;
+
+  std::priority_queue<std::pair<int, std::pair<int, int>>,
+                      std::vector<std::pair<int, std::pair<int, int>>>,
+                      std::greater<std::pair<int, std::pair<int, int>>>>
+      pq;
+
+  pq.push({0, {S - 1, 0}});
+
+  while (!pq.empty()) {
+    int curr_cost = pq.top().first;
+    int curr_node = pq.top().second.first;
+    int flights = pq.top().second.second;
+    pq.pop();
+
+    if (curr_cost > minCost[curr_node]) {
+      continue;
+    }
+
+    for (const Teleportation& tele : teleportations[curr_node]) {
+      int next_node = tele.to - 1;
+      int cost = tele.cost;
+
+      int newFlights = (cost > 0) ? flights + 1 : flights;
+
+      if (newFlights <= K && curr_cost + cost < minCost[next_node]) {
+        minCost[next_node] = curr_cost + cost;
+        pq.push({minCost[next_node], {next_node, newFlights}});
+      }
+    }
+  }
+
+  return (minCost[F - 1] == INFINITY_VALUE) ? -1 : minCost[F - 1];
+}
+
+int main() {
+  int N, M, K, S, F;
+  std::cin >> N >> M >> K >> S >> F;
+
+  std::vector<std::vector<Teleportation>> teleportations(N);
+
+  for (int i = 0; i < M; ++i) {
+    int Si, Fi, Pi;
+    std::cin >> Si >> Fi >> Pi;
+    teleportations[Si - 1].push_back({Fi, Pi});
+  }
+
+  int result = minCostToConference(N, M, K, S, F, teleportations);
+
+  std::cout << result << std::endl;
+
+  return 0;
+}
