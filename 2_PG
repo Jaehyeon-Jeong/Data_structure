@@ -1,0 +1,81 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+
+const int INFINITY_VALUE = 1e9;
+
+struct Edge {
+  int to;
+  int weight;
+};
+
+class LemonadeTrip {
+ private:
+  int a, b, M, x, y;
+  std::vector<std::vector<Edge>> graph;
+
+  int dijkstra();
+
+ public:
+  LemonadeTrip(int a, int b, int M, int x, int y);
+
+  int findMinimumLemonade();
+};
+
+LemonadeTrip::LemonadeTrip(int a, int b, int M, int x, int y)
+    : a(a), b(b), M(M), x(x), y(y) {
+  graph.resize(M);
+  for (int z = 0; z < M; ++z) {
+    int next1 = (z + 1) % M;
+    int next2 = (1LL * z * z + 1) % M;
+
+    graph[z].push_back({next1, a});
+    graph[z].push_back({next2, b});
+  }
+}
+
+int LemonadeTrip::dijkstra() {
+  std::vector<int> distance(M, INFINITY_VALUE);
+  distance[x] = 0;
+
+  std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>,
+                      std::greater<std::pair<int, int>>>
+      pq;
+  pq.push({0, x});
+
+  while (!pq.empty()) {
+    int curr_dist = pq.top().first;
+    int curr_node = pq.top().second;
+    pq.pop();
+
+    if (curr_dist > distance[curr_node]) {
+      continue;
+    }
+
+    for (const Edge& edge : graph[curr_node]) {
+      int next_node = edge.to;
+      int weight = edge.weight;
+
+      if (distance[curr_node] + weight < distance[next_node]) {
+        distance[next_node] = distance[curr_node] + weight;
+        pq.push({distance[next_node], next_node});
+      }
+    }
+  }
+
+  return (distance[y] == INFINITY_VALUE) ? -1 : distance[y];
+}
+
+int LemonadeTrip::findMinimumLemonade() { return dijkstra(); }
+
+int main() {
+  int a, b, M, x, y;
+  std::cin >> a >> b >> M >> x >> y;
+
+  LemonadeTrip trip(a, b, M, x, y);
+  int result = trip.findMinimumLemonade();
+
+  std::cout << result << std::endl;
+
+  return 0;
+}
