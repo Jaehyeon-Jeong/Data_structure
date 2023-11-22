@@ -1,0 +1,57 @@
+#include <iostream>
+#include <vector>
+
+class TeleporterNetwork {
+ private:
+  int numUniverses;
+  std::vector<std::vector<int>> adjacencyMatrix;
+
+ public:
+  TeleporterNetwork(int n)
+      : numUniverses(n), adjacencyMatrix(n, std::vector<int>(n, 0)) {}
+
+  void addTeleporter(int from, int to) { adjacencyMatrix[from][to] = 1; }
+
+  void floydWarshall() {
+    for (int k = 0; k < numUniverses; ++k) {
+      for (int i = 0; i < numUniverses; ++i) {
+        for (int j = 0; j < numUniverses; ++j) {
+          adjacencyMatrix[i][j] |=
+              (adjacencyMatrix[i][k] & adjacencyMatrix[k][j]);
+        }
+      }
+    }
+  }
+
+  void printPaths() {
+    for (int i = 0; i < numUniverses; ++i) {
+      for (int j = 0; j < numUniverses; ++j) {
+        std::cout << adjacencyMatrix[i][j];
+      }
+      std::cout << std::endl;
+    }
+  }
+};
+
+int main() {
+  int N;
+  std::cin >> N;
+
+  TeleporterNetwork network(N);
+
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < N; ++j) {
+      char isConnected;
+      std::cin >> isConnected;
+      if (isConnected == '1') {
+        network.addTeleporter(i, j);
+      }
+    }
+  }
+
+  network.floydWarshall();
+
+  network.printPaths();
+
+  return 0;
+}
