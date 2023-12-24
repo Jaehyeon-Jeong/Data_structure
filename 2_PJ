@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+
 class Algorithm {
  public:
   static void floydWarshall(std::vector<std::vector<int>>& adjacencyMatrix,
