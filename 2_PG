@@ -1,0 +1,109 @@
+#include <iostream>
+#include <limits>
+#include <queue>
+#include <vector>
+
+class LemonadeTripAlgorithm {
+ public:
+  virtual int findMinimumLemonade() = 0;
+  virtual ~LemonadeTripAlgorithm() = default;
+};
+
+class DijkstraAlgorithm : public LemonadeTripAlgorithm {
+ public:
+  struct Edge {
+    int to;
+    int weight;
+  };
+
+ private:
+  int x, y;
+  std::vector<std::vector<Edge>> graph;
+
+ public:
+  DijkstraAlgorithm(int x, int y, const std::vector<std::vector<Edge>>& graph);
+  int findMinimumLemonade() override;
+};
+
+DijkstraAlgorithm::DijkstraAlgorithm(
+    int x, int y, const std::vector<std::vector<Edge>>& graph)
+    : x(x), y(y), graph(graph) {}
+
+int DijkstraAlgorithm::findMinimumLemonade() {
+  int M = graph.size();
+  std::vector<int> distance(M, std::numeric_limits<int>::max());
+  distance[x] = 0;
+
+  std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>,
+                      std::greater<std::pair<int, int>>>
+      pq;
+  pq.push({0, x});
+
+  while (!pq.empty()) {
+    int curr_dist = pq.top().first;
+    int curr_node = pq.top().second;
+    pq.pop();
+
+    if (curr_dist > distance[curr_node]) {
+      continue;
+    }
+
+    for (const Edge& edge : graph[curr_node]) {
+      int next_node = edge.to;
+      int weight = edge.weight;
+
+      if (distance[curr_node] + weight < distance[next_node]) {
+        distance[next_node] = distance[curr_node] + weight;
+        pq.push({distance[next_node], next_node});
+      }
+    }
+  }
+
+  return (distance[y] == std::numeric_limits<int>::max()) ? -1 : distance[y];
+}
+
+class LemonadeTrip {
+ private:
+  LemonadeTripAlgorithm* algorithm;
+
+ public:
+  LemonadeTrip(LemonadeTripAlgorithm* algorithm);
+  int findMinimumLemonade();
+  static LemonadeTrip createFromInput();
+  ~LemonadeTrip();
+};
+
+LemonadeTrip::LemonadeTrip(LemonadeTripAlgorithm* algorithm)
+    : algorithm(algorithm) {}
+
+int LemonadeTrip::findMinimumLemonade() {
+  return algorithm->findMinimumLemonade();
+}
+
+LemonadeTrip LemonadeTrip::createFromInput() {
+  int a, b, M, x, y;
+  std::cin >> a >> b >> M >> x >> y;
+
+  std::vector<std::vector<DijkstraAlgorithm::Edge>> graph(M);
+  for (int z = 0; z < M; ++z) {
+    int next1 = (z + 1) % M;
+    int next2 = (1LL * z * z + 1) % M;
+
+    graph[z].push_back({next1, a});
+    graph[z].push_back({next2, b});
+  }
+
+  LemonadeTripAlgorithm* dijkstraAlgorithm = new DijkstraAlgorithm(x, y, graph);
+
+  return LemonadeTrip(dijkstraAlgorithm);
+}
+
+LemonadeTrip::~LemonadeTrip() { delete algorithm; }
+
+int main() {
+  LemonadeTrip trip = LemonadeTrip::createFromInput();
+  int result = trip.findMinimumLemonade();
+  std::cout << result << std::endl;
+
+  return 0;
+}
