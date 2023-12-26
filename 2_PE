@@ -1,25 +1,39 @@
-#include <algorithm>
 #include <iostream>
 #include <queue>
 #include <vector>
 
-struct Edge {
-  int a, b;
+class Graph {
+ public:
+  explicit Graph(int vertices);
+  void AddEdge(int a, int b);
+  virtual std::vector<int> TopologicalSort() = 0;
+
+ protected:
+  int vertices_;
+  std::vector<std::vector<int>> adjList_;
+  std::vector<int> inDegree_;
 };
 
-void Edgeconnect(std::vector<std::vector<int>>& adj,
-                 std::vector<int>& in_degree, int a, int b) {
-  adj[a].push_back(b);
-  in_degree[b]++;
+class TopologicalSorter : public Graph {
+ public:
+  using Graph::Graph;
+  std::vector<int> TopologicalSort() override;
+};
+
+Graph::Graph(int vertices)
+    : vertices_(vertices), adjList_(vertices), inDegree_(vertices, 0) {}
+
+void Graph::AddEdge(int a, int b) {
+  adjList_[a].push_back(b);
+  inDegree_[b]++;
 }
 
-std::vector<int> Topsort(int n, std::vector<std::vector<int>>& adj,
-                         std::vector<int>& in_degree) {
+std::vector<int> TopologicalSorter::TopologicalSort() {
   std::vector<int> result;
   std::vector<int> q;
 
-  for (int i = 0; i < n; i++) {
-    if (in_degree[i] == 0) {
+  for (int i = 0; i < vertices_; i++) {
+    if (inDegree_[i] == 0) {
       q.push_back(i);
     }
   }
@@ -29,13 +43,14 @@ std::vector<int> Topsort(int n, std::vector<std::vector<int>>& adj,
     q.pop_back();
     result.push_back(v);
 
-    for (int u : adj[v]) {
-      if (--in_degree[u] == 0) {
+    for (int u : adjList_[v]) {
+      if (--inDegree_[u] == 0) {
         q.push_back(u);
       }
     }
   }
-  if (static_cast<int>(result.size()) != n) {
+
+  if (static_cast<int>(result.size()) != vertices_) {
     return {};
   }
 
@@ -46,18 +61,18 @@ int main() {
   int n, m;
   std::cin >> n >> m;
 
-  std::vector<std::vector<int>> adj(n);
-  std::vector<int> in_degree(n, 0);
+  TopologicalSorter graph(n);
 
   for (int i = 0; i < m; i++) {
     int a, b;
     std::cin >> a >> b;
-    if (a < 0 || a > n || b < 0 || b > n) {
+    if (!(0 <= a && a < n) || !(0 <= b && b < n)) {
       return 0;
     }
-    Edgeconnect(adj, in_degree, a, b);
+    graph.AddEdge(a, b);
   }
-  std::vector<int> result = Topsort(n, adj, in_degree);
+
+  std::vector<int> result = graph.TopologicalSort();
 
   if (!result.empty()) {
     std::cout << "YES" << std::endl;
