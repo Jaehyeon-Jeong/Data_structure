@@ -1,0 +1,89 @@
+#include <cmath>
+#include <iostream>
+#include <limits>
+#include <vector>
+
+class SparseTable {
+private:
+  std::vector<std::vector<int>> st;
+  std::vector<int> log_2;
+
+public:
+  SparseTable(const std::vector<int> &arr) {
+    int n = arr.size();
+    int k = std::log2(n) + 1;
+
+    st.assign(n, std::vector<int>(k, 0));
+    log_2.assign(n + 1, 0);
+
+    for (int i = 2; i <= n; i++) {
+      log_2[i] = log_2[i / 2] + 1;
+    }
+
+    for (int i = 0; i < n; i++) {
+      st[i][0] = i;
+    }
+
+    for (int j = 1; (1 << j) <= n; j++) {
+      for (int i = 0; i + (1 << j) - 1 < n; i++) {
+        int idx1 = st[i][j - 1];
+        int idx2 = st[i + (1 << (j - 1))][j - 1];
+        st[i][j] = (arr[idx1] < arr[idx2]) ? idx1 : idx2;
+      }
+    }
+  }
+
+  int queryMinIndex(int l, int r, const std::vector<int> &arr) const {
+    int j = log_2[r - l + 1];
+    int idx1 = st[l][j];
+    int idx2 = st[r - (1 << j) + 1][j];
+    return (arr[idx1] < arr[idx2]) ? idx1 : idx2;
+  }
+};
+
+class SecondSmallestFinder {
+public:
+  static int find(const SparseTable &sparseTable, int l, int r,
+                  const std::vector<int> &sequence) {
+    int minIndex = sparseTable.queryMinIndex(l - 1, r - 1, sequence);
+    int secondSmallest = std::numeric_limits<int>::max();
+
+    if (l - 1 <= minIndex - 1) {
+      secondSmallest = std::min(
+          secondSmallest,
+          sequence[sparseTable.queryMinIndex(l - 1, minIndex - 1, sequence)]);
+    }
+
+    if (minIndex + 1 <= r - 1) {
+      secondSmallest = std::min(
+          secondSmallest,
+          sequence[sparseTable.queryMinIndex(minIndex + 1, r - 1, sequence)]);
+    }
+
+    return secondSmallest;
+  }
+};
+
+int main() {
+  int N, M;
+  std::cin >> N >> M;
+
+  std::vector<int> sequence(N);
+  for (int i = 0; i < N; i++) {
+    std::cin >> sequence[i];
+  }
+
+  SparseTable sparseTable(sequence);
+
+  for (int i = 0; i < M; i++) {
+    int l, r;
+    std::cin >> l >> r;
+
+    int secondSmallest =
+        SecondSmallestFinder::find(sparseTable, l, r, sequence);
+
+    std::cout << secondSmallest << std::endl;
+  }
+
+  return 0;
+}
