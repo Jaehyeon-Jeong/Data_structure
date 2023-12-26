@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+
+class Algorithm {
+ public:
+  static void floydWarshall(std::vector<std::vector<int>>& adjacencyMatrix,
+                            int numUniverses) {
+    for (int k = 0; k < numUniverses; ++k) {
+      for (int i = 0; i < numUniverses; ++i) {
+        for (int j = 0; j < numUniverses; ++j) {
+          adjacencyMatrix[i][j] |=
+              (adjacencyMatrix[i][k] & adjacencyMatrix[k][j]);
+        }
+      }
+    }
+  }
+};
+
+class TeleporterNetwork {
+ private:
+  int numUniverses;
+  std::vector<std::vector<int>> adjacencyMatrix;
+
+ public:
+  TeleporterNetwork(int n)
+      : numUniverses(n), adjacencyMatrix(n, std::vector<int>(n, 0)) {}
+
+  int getNumUniverses() const { return numUniverses; }
+
+  void addTeleporter(int from, int to) { adjacencyMatrix[from][to] = 1; }
+
+  void applyAlgorithm() {
+    Algorithm::floydWarshall(adjacencyMatrix, numUniverses);
+  }
+
+  void printPaths() const {
+    for (int i = 0; i < numUniverses; ++i) {
+      for (int j = 0; j < numUniverses; ++j) {
+        std::cout << adjacencyMatrix[i][j];
+      }
+      std::cout << std::endl;
+    }
+  }
+};
+
+class InputHandler {
+ public:
+  static void count(TeleporterNetwork& network) {
+    int N = network.getNumUniverses();
+    for (int i = 0; i < N; ++i) {
+      for (int j = 0; j < N; ++j) {
+        char isConnected;
+        std::cin >> isConnected;
+        if (isConnected == '1') {
+          network.addTeleporter(i, j);
+        }
+      }
+    }
+  }
+};
+
+int main() {
+  int N;
+  std::cin >> N;
+
+  TeleporterNetwork network(N);
+  InputHandler::count(network);
+
+  network.applyAlgorithm();
+  network.printPaths();
+
+  return 0;
+}
