@@ -1,0 +1,108 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+
+const int INFINITY_VALUE = 1e9;
+
+struct Teleportation {
+  int to;
+  int cost;
+};
+
+class PathFinder {
+ public:
+  virtual ~PathFinder() = default;
+  virtual int findMinCostToDestination(
+      int S, int F,
+      const std::vector<std::vector<Teleportation>>& teleportations) const = 0;
+};
+
+class DijkstraPathFinder : public PathFinder {
+ private:
+  int K;
+
+ public:
+  DijkstraPathFinder(int maxFlights) : K(maxFlights) {}
+
+  int findMinCostToDestination(int S, int F,
+                               const std::vector<std::vector<Teleportation>>&
+                                   teleportations) const override {
+    std::vector<int> minCost(teleportations.size(), INFINITY_VALUE);
+    minCost[S - 1] = 0;
+
+    std::priority_queue<std::pair<int, std::pair<int, int>>,
+                        std::vector<std::pair<int, std::pair<int, int>>>,
+                        std::greater<std::pair<int, std::pair<int, int>>>>
+        pq;
+
+    pq.push({0, {S - 1, 0}});
+
+    while (!pq.empty()) {
+      int curr_cost = pq.top().first;
+      int curr_node = pq.top().second.first;
+      int flights = pq.top().second.second;
+      pq.pop();
+
+      if (curr_cost > minCost[curr_node]) {
+        continue;
+      }
+
+      for (const Teleportation& tele : teleportations[curr_node]) {
+        int next_node = tele.to - 1;
+        int cost = tele.cost;
+
+        int newFlights = (cost > 0) ? flights + 1 : flights;
+
+        if (newFlights <= K && curr_cost + cost < minCost[next_node]) {
+          minCost[next_node] = curr_cost + cost;
+          pq.push({minCost[next_node], {next_node, newFlights}});
+        }
+      }
+    }
+
+    return (minCost[F - 1] == INFINITY_VALUE) ? -1 : minCost[F - 1];
+  }
+};
+
+class ConferencePathFinder {
+ private:
+  int N;
+  int M;
+  int K;
+  int S;
+  int F;
+  const PathFinder& pathFinder;
+  std::vector<std::vector<Teleportation>> teleportations;
+
+ public:
+  ConferencePathFinder(int N, int M, int K, int S, int F,
+                       const PathFinder& pathFinder)
+      : N(N), M(M), K(K), S(S), F(F), pathFinder(pathFinder) {}
+
+  void readTeleportationData() {
+    teleportations.resize(N);
+    for (int i = 0; i < M; ++i) {
+      int Si, Fi, Pi;
+      std::cin >> Si >> Fi >> Pi;
+      teleportations[Si - 1].push_back({Fi, Pi});
+    }
+  }
+
+  int findMinCostToConference() const {
+    return pathFinder.findMinCostToDestination(S, F, teleportations);
+  }
+};
+
+int main() {
+  int N, M, K, S, F;
+  std::cin >> N >> M >> K >> S >> F;
+
+  DijkstraPathFinder dijkstraPathFinder(K);
+  ConferencePathFinder conferencePathFinder(N, M, K, S, F, dijkstraPathFinder);
+  conferencePathFinder.readTeleportationData();
+  int result = conferencePathFinder.findMinCostToConference();
+
+  std::cout << result << std::endl;
+
+  return 0;
+}
