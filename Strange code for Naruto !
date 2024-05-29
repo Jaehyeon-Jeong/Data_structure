@@ -1,0 +1,83 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+const int max_pattern = 5000;
+const int max_text = 2000000;
+
+class kmp_q {
+ private:
+  std::string pattern;
+  int m;
+  std::vector<int> lps;
+
+  void computeLPS() {
+    lps.resize(m, 0);
+    int len = 0;
+    int i = 1;
+    while (i < m) {
+      if (pattern[i] == pattern[len] || pattern[i] == '?' ||
+          pattern[len] == '?') {
+        len++;
+        lps[i] = len;
+        i++;
+      } else {
+        if (len != 0) {
+          len = lps[len - 1];
+        } else {
+          lps[i] = 0;
+          i++;
+        }
+      }
+    }
+  }
+
+ public:
+  kmp_q(const std::string& pattern) : pattern(pattern), m(pattern.size()) {
+    computeLPS();
+  }
+
+  std::vector<int> search(const std::string& text) {
+    int n = text.size();
+    std::vector<int> positions;
+    int i = 0;
+    int j = 0;
+
+    while (i < n) {
+      while (j < m && i < n && (pattern[j] == text[i] || pattern[j] == '?')) {
+        j++;
+        i++;
+      }
+      if (j == m) {
+        positions.push_back(i - j);
+      }
+      if (j > 0) {
+        i = i - j + 1;
+      } else {
+        i++;
+      }
+      j = 0;
+    }
+    return positions;
+  }
+};
+
+int main() {
+  std::string pattern, text;
+  std::cin >> pattern >> text;
+
+  if (pattern.empty()) {
+    return 0;
+  }
+
+  kmp_q kmp(pattern);
+  std::vector<int> positions = kmp.search(text);
+
+  for (size_t i = 0; i < positions.size(); i++) {
+    if (i > 0) std::cout << " ";
+    std::cout << positions[i];
+  }
+  std::cout << std::endl;
+
+  return 0;
+}
