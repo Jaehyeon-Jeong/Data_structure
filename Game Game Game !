@@ -1,0 +1,38 @@
+#include <iostream>
+#include <limits>
+#include <vector>
+
+class doc_strange_answer {
+ public:
+  int min_money(int n) {
+    std::vector<std::vector<int>> dp(
+        n + 1, std::vector<int>(n + 1, std::numeric_limits<int>::max() / 2));
+
+    for (int i = 1; i <= n; ++i) {
+      dp[i][i] = 0;
+    }
+
+    for (int len = 2; len <= n; ++len) {
+      for (int i = 1; i <= n - len + 1; ++i) {
+        int j = i + len - 1;
+        for (int guess = i; guess <= j; ++guess) {
+          int cost = guess + std::max((guess > 1 ? dp[i][guess - 1] : 0),
+                                      (guess < n ? dp[guess + 1][j] : 0));
+          dp[i][j] = std::min(dp[i][j], cost);
+        }
+      }
+    }
+
+    return dp[1][n];
+  }
+};
+
+int main() {
+  int n;
+  std::cin >> n;
+
+  doc_strange_answer solution;
+  std::cout << solution.min_money(n) << std::endl;
+
+  return 0;
+}
