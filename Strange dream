@@ -1,0 +1,121 @@
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+
+struct Vector {
+  double x, y, z;
+
+  Vector(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {}
+
+  Vector operator+(const Vector& rhs) const {
+    return {x + rhs.x, y + rhs.y, z + rhs.z};
+  }
+
+  Vector operator-(const Vector& rhs) const {
+    return {x - rhs.x, y - rhs.y, z - rhs.z};
+  }
+
+  Vector operator*(double scalar) const {
+    return {x * scalar, y * scalar, z * scalar};
+  }
+
+  double dot(const Vector& rhs) const {
+    return x * rhs.x + y * rhs.y + z * rhs.z;
+  }
+
+  double norm() const { return std::sqrt(x * x + y * y + z * z); }
+};
+
+struct Line {
+  Vector p1, p2;
+};
+
+double dist(const Line& line1, const Line& line2) {
+  const double EPS = 0.00000001;
+
+  Vector delta21 = line1.p2 - line1.p1;
+  Vector delta41 = line2.p2 - line2.p1;
+  Vector delta13 = line1.p1 - line2.p1;
+
+  double a = delta21.dot(delta21);
+  double b = delta21.dot(delta41);
+  double c = delta41.dot(delta41);
+  double d = delta21.dot(delta13);
+  double e = delta41.dot(delta13);
+  double D = a * c - b * b;
+
+  double sc, sN, sD = D;
+  double tc, tN, tD = D;
+
+  if (D < EPS) {
+    sN = 0.0;
+    sD = 1.0;
+    tN = e;
+    tD = c;
+  } else {
+    sN = (b * e - c * d);
+    tN = (a * e - b * d);
+    if (sN < 0.0) {
+      sN = 0.0;
+      tN = e;
+      tD = c;
+    } else if (sN > sD) {
+      sN = sD;
+      tN = e + b;
+      tD = c;
+    }
+  }
+
+  if (tN < 0.0) {
+    tN = 0.0;
+    if (-d < 0.0) {
+      sN = 0.0;
+    } else if (-d > a) {
+      sN = sD;
+    } else {
+      sN = -d;
+      sD = a;
+    }
+  } else if (tN > tD) {
+    tN = tD;
+    if ((-d + b) < 0.0) {
+      sN = 0.0;
+    } else if ((-d + b) > a) {
+      sN = sD;
+    } else {
+      sN = (-d + b);
+      sD = a;
+    }
+  }
+
+  if (std::abs(sN) < EPS) {
+    sc = 0.0;
+  } else {
+    sc = sN / sD;
+  }
+
+  if (std::abs(tN) < EPS) {
+    tc = 0.0;
+  } else {
+    tc = tN / tD;
+  }
+
+  Vector dP = delta13 + delta21 * sc - delta41 * tc;
+
+  return dP.norm();
+}
+
+int main() {
+  Line line1, line2;
+
+  std::cin >> line1.p1.x >> line1.p1.y >> line1.p1.z;
+  std::cin >> line1.p2.x >> line1.p2.y >> line1.p2.z;
+  std::cin >> line2.p1.x >> line2.p1.y >> line2.p1.z;
+  std::cin >> line2.p2.x >> line2.p2.y >> line2.p2.z;
+
+  double distance = dist(line1, line2);
+
+  std::cout << std::fixed << std::setprecision(6) << distance << std::endl;
+
+  return 0;
+}
