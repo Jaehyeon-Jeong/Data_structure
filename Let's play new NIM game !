@@ -1,38 +1,49 @@
 #include <iostream>
 #include <vector>
 
-const int max_s = 101;
-const int max_heap = 10001;
-
-int cal_grundy(const std::vector<int>& S, std::vector<int>& grundy, int x) {
-  if (grundy[x] != -1) {
-    return grundy[x];
-  }
-
-  std::vector<bool> reachable(max_heap, false);
-
-  for (int s : S) {
-    if (x - s >= 0) {
-      reachable[cal_grundy(S, grundy, x - s)] = true;
+class Nim {
+ public:
+  Nim(const std::vector<int>& S, int max_heap) : S(S), max_heap(max_heap) {
+    grundy.resize(max_heap, -1);
+    for (int i = 0; i < max_heap; ++i) {
+      cal_grundy(i);
     }
   }
 
-  int mex = 0;
-  while (reachable[mex]) {
-    mex++;
+  char res(const std::vector<int>& heaps) {
+    int all_grundy = 0;
+    for (int heap : heaps) {
+      all_grundy ^= grundy[heap];
+    }
+    return all_grundy == 0 ? 'L' : 'W';
   }
 
-  return grundy[x] = mex;
-}
+ private:
+  std::vector<int> S;
+  int max_heap;
+  std::vector<int> grundy;
 
-char l_or_w(const std::vector<int>& S, const std::vector<int>& heaps,
-            const std::vector<int>& grundy) {
-  int all_grundy = 0;
-  for (int heap : heaps) {
-    all_grundy ^= grundy[heap];
+  int cal_grundy(int x) {
+    if (grundy[x] != -1) {
+      return grundy[x];
+    }
+
+    std::vector<bool> reachable(max_heap, false);
+
+    for (int s : S) {
+      if (x - s >= 0) {
+        reachable[cal_grundy(x - s)] = true;
+      }
+    }
+
+    int mex = 0;
+    while (reachable[mex]) {
+      mex++;
+    }
+
+    return grundy[x] = mex;
   }
-  return all_grundy == 0 ? 'L' : 'W';
-}
+};
 
 int main() {
   int k;
@@ -42,11 +53,8 @@ int main() {
     std::cin >> S[i];
   }
 
-  std::vector<int> grundy(max_heap, -1);
-
-  for (int i = 0; i < max_heap; ++i) {
-    cal_grundy(S, grundy, i);
-  }
+  const int max_heap = 10001;
+  Nim game(S, max_heap);
 
   int q;
   std::cin >> q;
@@ -57,7 +65,7 @@ int main() {
     for (int l = 0; l < j; ++l) {
       std::cin >> heaps[l];
     }
-    std::cout << l_or_w(S, heaps, grundy);
+    std::cout << game.res(heaps);
   }
 
   return 0;
